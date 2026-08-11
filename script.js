@@ -419,3 +419,157 @@ function syncRoomOccupancyFromStudents() {
     populateRoomDropdown();
     updateDashboardCards();
 }
+
+/* ===================================================
+   3. EXPORT TO CSV LOGIC
+=================================================== */
+
+// Helper Function: Data Array ko CSV file me convert karke download karwata h
+function downloadCSVFile(csvContent, fileName){
+ const blob = new Blob([csvContent], {type: 'text/csv;charset=utf-8;'});
+ const link = document.createElement("a");
+ const url = URL.createObjectURL(blob);
+
+ link.setAttribute("href", url);
+ link.setAttribute("download", fileName);
+ link.style.visibility = 'hidden';
+
+ document.body.appendChild(link);
+ link.click();
+ document.body.removeChild(link);
+
+}
+
+// 1 Student list export function
+function exportStudentToCSV() {
+ if (!allStudents || allStudents.length ===0){
+  showToastt("No student data available to export!", "error");
+  return;
+  }
+
+  //CSV Headers
+  let csv = "ID,Name,Room Number,Mobile No,Course,Payment Status,Address\n";
+
+  // Loop through each student
+  allStudent.forEach(s => {
+   const row = [
+   `"${s.id}"`,
+   `"${s.name || ''}"`,
+   `"${s.roomNumber || ''}"`,
+   `"${s.mobileNo || ''}"`,
+   `"${s.course || ''}"`,
+               `"${s.paymentStatus || ''}"`,
+               `"${(s.address || '').replace(/"/g, '""')}"` // Double quote escape
+               ];
+               csv += row.join(",") + "\n";
+               });
+               const dateStr = new Date().toISOString().slice(0,10);
+               downloadCSVFile(csv, `Students_Report_${dateStr}.csv`);
+               showToast("Students report exported successfully!", "success");
+
+  }
+
+  // 2. Room List Export Function
+  function exportRoomsToCSV() {
+      if (!allRooms || allRooms.length === 0) {
+          showToast("No room data available to export!", "error");
+          return;
+      }
+
+      // CSV Headers
+      let csv = "ID,Room Number,Room Type,Capacity,Current Occupants,Available Beds,Price(INR)\n";
+
+      allRooms.forEach(r => {
+          const bedsLeft = Math.max(0, (r.capacity || 0) - (r.currentOccupants || 0));
+          const row = [
+              `"${r.id}"`,
+              `"${r.roomNumber || ''}"`,
+              `"${r.roomType || ''}"`,
+              `"${r.capacity || 0}"`,
+              `"${r.currentOccupants || 0}"`,
+              `"${bedsLeft}"`,
+              `"${r.price || 0}"`
+          ];
+          csv += row.join(",") + "\n";
+      });
+
+      const dateStr = new Date().toISOString().slice(0, 10);
+      downloadCSVFile(csv, `Rooms_Report_${dateStr}.csv`);
+      showToast("Rooms report exported successfully!", "success");
+  }
+
+  /* ===================================================
+     EXPORT DATA TO CSV LOGIC
+  =================================================== */
+
+  // Helper Function: Triggers file download
+  function downloadCSVFile(csvContent, fileName) {
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+
+      link.setAttribute("href", url);
+      link.setAttribute("download", fileName);
+      link.style.visibility = 'hidden';
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+  }
+
+  // 1. Export Students to CSV
+  function exportStudentsToCSV() {
+      if (!allStudents || allStudents.length === 0) {
+          if (typeof showToast === "function") showToast("No student data available to export!", "error");
+          else alert("No student data available to export!");
+          return;
+      }
+
+      let csv = "ID,Name,Room Number,Mobile No,Course,Payment Status,Address\n";
+
+      allStudents.forEach(s => {
+          const row = [
+              `"${s.id}"`,
+              `"${s.name || ''}"`,
+              `"${s.roomNumber || ''}"`,
+              `"${s.mobileNo || ''}"`,
+              `"${s.course || ''}"`,
+              `"${s.paymentStatus || ''}"`,
+              `"${(s.address || '').replace(/"/g, '""')}"`
+          ];
+          csv += row.join(",") + "\n";
+      });
+
+      const dateStr = new Date().toISOString().slice(0, 10);
+      downloadCSVFile(csv, `Students_Report_${dateStr}.csv`);
+      if (typeof showToast === "function") showToast("Students report exported successfully!", "success");
+  }
+
+  // 2. Export Rooms to CSV
+  function exportRoomsToCSV() {
+      if (!allRooms || allRooms.length === 0) {
+          if (typeof showToast === "function") showToast("No room data available to export!", "error");
+          else alert("No room data available to export!");
+          return;
+      }
+
+      let csv = "ID,Room Number,Room Type,Capacity,Current Occupants,Available Beds,Price(INR)\n";
+
+      allRooms.forEach(r => {
+          const bedsLeft = Math.max(0, (r.capacity || 0) - (r.currentOccupants || 0));
+          const row = [
+              `"${r.id}"`,
+              `"${r.roomNumber || ''}"`,
+              `"${r.roomType || ''}"`,
+              `"${r.capacity || 0}"`,
+              `"${r.currentOccupants || 0}"`,
+              `"${bedsLeft}"`,
+              `"${r.price || 0}"`
+          ];
+          csv += row.join(",") + "\n";
+      });
+
+      const dateStr = new Date().toISOString().slice(0, 10);
+      downloadCSVFile(csv, `Rooms_Report_${dateStr}.csv`);
+      if (typeof showToast === "function") showToast("Rooms report exported successfully!", "success");
+  }
