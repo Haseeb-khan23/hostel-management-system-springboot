@@ -75,6 +75,16 @@ function renderStudentTable(students) {
                     <button class="edit-btn" onclick="editStudent(${s.id})">Edit</button>
                     <button class="delete-btn" onclick="deleteStudent(${s.id})">Delete</button>
                 </td>
+
+                <td>
+
+                 <button type="button"
+                   style="background-color: #0288d1; color: white; padding: 5px 10px; font-size: 12px; border: none; border-radius: 4px; cursor: pointer; margin-left: 4px;"
+                   onclick="generateReceipt(${s.id})">
+                   📄 Receipt
+                   </button>
+                 </td>
+
             </tr>
         `;
     });
@@ -573,3 +583,114 @@ function exportStudentToCSV() {
       downloadCSVFile(csv, `Rooms_Report_${dateStr}.csv`);
       if (typeof showToast === "function") showToast("Rooms report exported successfully!", "success");
   }
+
+  /* ===================================================
+     FEES RECEIPT PDF GENERATOR LOGIC
+  =================================================== */
+function generateReceipt(studentId) {
+    const student = allStudents.find(s => s.id === studentId);
+    if (!student) {
+        showToast("Student details not found!", "error");
+        return;
+    }
+
+    // Safely extract properties with fallback options
+    const studentName = student.name || 'N/A';
+    const roomNo = student.roomNumber || student.roomNo || 'N/A';
+    const mobile = student.mobileNo || student.mobile || 'N/A';
+    const courseName = student.course || 'N/A';
+    const status = student.paymentStatus || student.status || 'PENDING';
+
+    const room = allRooms ? allRooms.find(r => String(r.roomNumber) === String(roomNo)) : null;
+    const roomPrice = room && room.price ? `₹${room.price}` : '₹5,000';
+
+    const dateToday = new Date().toLocaleDateString('en-IN', {
+        year: 'numeric', month: 'long', day: 'numeric'
+    });
+
+    // Temporary Container attached to DOM for full dimension rendering
+    const receiptElement = document.createElement('div');
+    receiptElement.id = 'temp-receipt-container';
+    receiptElement.style.padding = '20px';
+    receiptElement.style.fontFamily = 'Segoe UI, Arial, sans-serif';
+    receiptElement.style.color = '#333';
+    receiptElement.style.width = '500px';
+    receiptElement.style.background = '#ffffff';
+
+    receiptElement.innerHTML = `
+        <div style="border: 2px solid #2563eb; border-radius: 8px; padding: 20px; background: #ffffff;">
+            <!-- Header -->
+            <div style="text-align: center; border-bottom: 2px dashed #2563eb; padding-bottom: 12px; margin-bottom: 15px;">
+                <h2 style="margin: 0; color: #2563eb; font-size: 20px; text-transform: uppercase; letter-spacing: 0.5px;">HOSTEL MANAGEMENT SYSTEM</h2>
+                <p style="margin: 4px 0 0 0; color: #64748b; font-size: 12px;">Official Monthly Fee Payment Receipt</p>
+            </div>
+
+            <!-- Meta Info -->
+            <table style="width: 100%; margin-bottom: 15px; font-size: 12px; color: #475569;">
+                <tr>
+                    <td><strong>Receipt No:</strong> HMS-${student.id}-${Date.now().toString().slice(-4)}</td>
+                    <td style="text-align: right;"><strong>Date:</strong> ${dateToday}</td>
+                </tr>
+            </table>
+
+            <!-- Details Table -->
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px;">
+                <tr style="background-color: #f8fafc;">
+                    <td style="padding: 8px 10px; border: 1px solid #cbd5e1; width: 40%;"><strong>Student Name</strong></td>
+                    <td style="padding: 8px 10px; border: 1px solid #cbd5e1;">${studentName}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 10px; border: 1px solid #cbd5e1;"><strong>Room Number</strong></td>
+                    <td style="padding: 8px 10px; border: 1px solid #cbd5e1;">Room ${roomNo}</td>
+                </tr>
+                <tr style="background-color: #f8fafc;">
+                    <td style="padding: 8px 10px; border: 1px solid #cbd5e1;"><strong>Course / Branch</strong></td>
+                    <td style="padding: 8px 10px; border: 1px solid #cbd5e1;">${courseName}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 10px; border: 1px solid #cbd5e1;"><strong>Mobile No</strong></td>
+                    <td style="padding: 8px 10px; border: 1px solid #cbd5e1;">${mobile}</td>
+                </tr>
+                <tr style="background-color: #f8fafc;">
+                    <td style="padding: 8px 10px; border: 1px solid #cbd5e1;"><strong>Fee Amount</strong></td>
+                    <td style="padding: 8px 10px; border: 1px solid #cbd5e1; font-weight: bold;">${roomPrice}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 10px; border: 1px solid #cbd5e1;"><strong>Payment Status</strong></td>
+                    <td style="padding: 8px 10px; border: 1px solid #cbd5e1; font-weight: bold; color: ${String(status).toUpperCase() === 'PAID' ? '#16a34a' : '#dc2626'};">
+                        ${String(status).toUpperCase()}
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Footer Stamp & Signature -->
+            <table style="width: 100%; margin-top: 20px; align-items: flex-end;">
+                <tr>
+                    <td style="font-size: 10px; color: #94a3b8; width: 60%;">* Computer-generated receipt.<br>Valid without physical signature.</td>
+                    <td style="text-align: center; width: 40%;">
+                        <div style="border-bottom: 1px solid #333; width: 110px; margin: 0 auto 4px auto;"></div>
+                        <strong style="font-size: 11px; color: #334155;">Authorized Warden</strong>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    `;
+
+    // Append temporarily to body so html2pdf can render exact bounding box
+    document.body.appendChild(receiptElement);
+
+    const opt = {
+        margin:       8,
+        filename:     `Receipt_${studentName.replace(/\s+/g, '_')}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, scrollX: 0, scrollY: 0 },
+        jsPDF:        { unit: 'mm', format: 'a5', orientation: 'portrait' }
+    };
+
+    if (typeof showToast === 'function') showToast("Generating PDF receipt...", "success");
+
+    html2pdf().set(opt).from(receiptElement).save().then(() => {
+        // Remove element after PDF generation complete
+        document.body.removeChild(receiptElement);
+    });
+}
