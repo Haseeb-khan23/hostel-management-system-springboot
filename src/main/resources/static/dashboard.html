@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | Hostel Management System</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+<div class="app-layout"><aside class="sidebar" id="sidebar"></aside><main class="main-content">
+  <header class="top-header"><div><h2>Dashboard</h2><p>Hostel management overview</p></div><div><strong id="userDisplayName">User</strong> <span id="userRoleBadge" class="badge">ROLE</span></div></header>
+  <div id="alertBox" class="alert hidden"></div>
+  <section id="adminStats" class="stats-grid">
+    <div class="stat-card"><div class="stat-title">Total Students</div><div id="statStudents" class="stat-value">0</div></div>
+    <div class="stat-card"><div class="stat-title">Total Rooms</div><div id="statRooms" class="stat-value">0</div></div>
+    <div class="stat-card"><div class="stat-title">Occupied Rooms</div><div id="statOccupiedRooms" class="stat-value">0</div></div>
+    <div class="stat-card"><div class="stat-title">Available Rooms</div><div id="statAvailableRooms" class="stat-value">0</div></div>
+    <div class="stat-card"><div class="stat-title">Pending Payments</div><div id="statPendingPayments" class="stat-value">0</div></div>
+    <div class="stat-card"><div class="stat-title">Pending Complaints</div><div id="statPendingComplaints" class="stat-value">0</div></div>
+  </section>
+  <div class="card"><h3>System Notes</h3><p>The dashboard data comes directly from <code>/api/dashboard/admin</code>.</p></div>
+</main></div>
+<script src="js/api.js"></script><script src="js/common.js"></script><script src="js/dashboard.js"></script>
+</body>
+</html>

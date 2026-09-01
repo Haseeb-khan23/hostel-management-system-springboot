@@ -1,48 +1,65 @@
 package com.hostel.controller;
 
 import com.hostel.entity.Room;
-import com.hostel.repository.RoomRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.hostel.service.RoomService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
+
 @RestController
 @RequestMapping("/api/rooms")
-//@CrossOrigin(origins = "*")
+@CrossOrigin(
+        origins = "*",
+        allowedHeaders = "*",
+        methods = {
+                RequestMethod.GET,
+                RequestMethod.POST,
+                RequestMethod.PUT,
+                RequestMethod.DELETE,
+                RequestMethod.OPTIONS
+        }
+)
 public class RoomController {
 
-    @Autowired
-    private RoomRepository roomRepository;
+    private final RoomService roomService;
+
+    public RoomController(RoomService roomService) {
+        this.roomService = roomService;
+    }
 
     @GetMapping
     public List<Room> getAllRooms() {
-        return roomRepository.findAll();
+        return roomService.getAllRooms();
+    }
+
+    @GetMapping("/{id}")
+    public Room getRoomById(@PathVariable Long id) {
+        return roomService.getRoomById(id);
     }
 
     @PostMapping
-    public Room createRoom(@RequestBody Room room) {
-        return roomRepository.save(room);
+    @PreAuthorize("hasRole('ADMIN')")
+    public Room createRoom(@Valid @RequestBody Room room) {
+        return roomService.saveRoom(room);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Room> updateRoom(@PathVariable Long id, @RequestBody Room roomDetails) {
-        Room room = roomRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Room not found with id: " + id));
+    public ResponseEntity<Room> updateRoom(
+            @PathVariable Long id,
+            @Valid @RequestBody Room roomDetails) {
 
-        room.setRoomNumber(roomDetails.getRoomNumber());
-        room.setRoomType(roomDetails.getRoomType());
-        room.setCapacity(roomDetails.getCapacity());
-        room.setPrice(roomDetails.getPrice());
+        Room updatedRoom = roomService.updateRoom(id, roomDetails);
 
-        Room updatedRoom = roomRepository.save(room);
         return ResponseEntity.ok(updatedRoom);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteRoom(@PathVariable Long id) {
-        roomRepository.deleteById(id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Void> deleteRoom(@PathVariable Long id) {
+        roomService.deleteRoom(id);
+
+        return ResponseEntity.noContent().build();
     }
 }
