@@ -240,27 +240,17 @@ async function loadRooms() {
 
                         <td class="admin-only">
 
-                            ${
-                                isAvailable
-                                    ? `
-                                        <button
-                                            class="btn btn-sm btn-secondary"
-                                            onclick="editRoom(${room.id})">
-                                            Edit
-                                        </button>
+                            <button
+                                class="btn btn-sm btn-secondary"
+                                onclick="editRoom(${room.id})">
+                                Edit
+                            </button>
 
-                                        <button
-                                            class="btn btn-sm btn-danger"
-                                            onclick="deleteRoom(${room.id})">
-                                            Delete
-                                        </button>
-                                      `
-                                    : `
-                                        <span class="text-muted">
-                                            Room Full
-                                        </span>
-                                      `
-                            }
+                            <button
+                                class="btn btn-sm btn-danger"
+                                onclick="deleteRoom(${room.id})">
+                                Delete
+                            </button>
 
                         </td>
 
@@ -304,15 +294,7 @@ async function editRoom(id) {
             );
 
 
-        // Do not allow editing a full room
-        if (occupants >= capacity) {
 
-            showAlert(
-                'Operations are allowed only on available rooms.'
-            );
-
-            return;
-        }
 
 
         document.getElementById(
@@ -388,14 +370,7 @@ async function deleteRoom(id) {
             );
 
 
-        if (occupants >= capacity) {
 
-            showAlert(
-                'Operations are allowed only on available rooms.'
-            );
-
-            return;
-        }
 
 
         await api.delete(`/rooms/${id}`);

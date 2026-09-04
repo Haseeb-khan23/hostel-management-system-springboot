@@ -79,7 +79,7 @@ function setupEventListeners() {
             const payload = {
                 amount: amount,
                 paymentMethod: paymentMethod,
-                status: 'Paid'
+                status: 'PAID'
             };
 
             try {
@@ -177,21 +177,17 @@ async function loadPayments() {
         // Admin can see all payment records.
         // Student can only see their own records
         // if the backend provides such an endpoint.
-        if (role === 'ROLE_STUDENT') {
+        let payments;
 
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="8" class="text-center">
-                        Payment records are view-only for students.
-                    </td>
-                </tr>
-            `;
+        if (role === 'STUDENT') {
 
-            return;
+            payments = await api.get('/payments/my');
+
+        } else {
+
+            payments = await api.get('/payments');
+
         }
-
-        const payments =
-            await api.get('/payments');
 
         if (!payments || payments.length === 0) {
 

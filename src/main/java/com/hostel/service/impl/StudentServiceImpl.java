@@ -108,6 +108,18 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    public StudentResponse getMyStudent(String username) {
+
+        Student student = studentRepository
+                .findByUser_Username(username)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Student account is not linked to a student record"));
+
+        return toStudentResponse(student);
+    }
+
+    @Override
     public Student updateStudent(Long id, Student studentDetails) {
 
         Student existingStudent = studentRepository.findById(id)

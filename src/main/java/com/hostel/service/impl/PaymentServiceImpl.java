@@ -52,6 +52,14 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    public List<Payment> getPaymentsForUser(
+            String username) {
+
+        return paymentRepository
+                .findByStudent_User_Username(username);
+    }
+
+    @Override
     public Payment getPaymentById(Long id) {
 
         return paymentRepository.findById(id)

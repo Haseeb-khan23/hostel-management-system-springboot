@@ -20,6 +20,7 @@ public interface StudentService {
 //    );
 
     StudentResponse getStudentById(Long id);
+    StudentResponse getMyStudent(String username);
 
     Student updateStudent(Long id, Student studentDetails);
 

@@ -13,6 +13,10 @@ public interface PaymentService {
 
     List<Payment> getAllPayments();
 
+    List<Payment> getPaymentsForUser(
+            String username
+    );
+
     Payment getPaymentById(Long id);
 
     Payment updatePayment(

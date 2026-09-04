@@ -4,6 +4,9 @@ import com.hostel.entity.Payment;
 import com.hostel.service.PaymentService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,11 +33,23 @@ public class PaymentController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public List<Payment> getAllPayments() {
         return paymentService.getAllPayments();
     }
 
+    @GetMapping("/my")
+    @PreAuthorize("hasRole('STUDENT')")
+    public List<Payment> getMyPayments(
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        return paymentService.getPaymentsForUser(
+                userDetails.getUsername()
+        );
+    }
+
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Payment getPaymentById(
             @PathVariable Long id) {
 
@@ -42,6 +57,7 @@ public class PaymentController {
     }
 
     @PostMapping("/student/{studentId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Payment createPayment(
             @PathVariable Long studentId,
             @Valid @RequestBody Payment payment) {
@@ -52,6 +68,7 @@ public class PaymentController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Payment> updatePayment(
             @PathVariable Long id,
             @Valid @RequestBody Payment paymentDetails) {
@@ -65,6 +82,7 @@ public class PaymentController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deletePayment(
             @PathVariable Long id) {
 

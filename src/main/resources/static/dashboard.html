@@ -19,7 +19,38 @@
     <div class="stat-card"><div class="stat-title">Pending Payments</div><div id="statPendingPayments" class="stat-value">0</div></div>
     <div class="stat-card"><div class="stat-title">Pending Complaints</div><div id="statPendingComplaints" class="stat-value">0</div></div>
   </section>
-  <div class="card"><h3>System Notes</h3><p>The dashboard data comes directly from <code>/api/dashboard/admin</code>.</p></div>
+  <div id="studentRoomCard" class="card hidden">
+    <h3>My Room</h3>
+
+    <div class="student-room-details">
+      <p>
+        <strong>Room Number:</strong>
+        <span id="myRoomNumber">-</span>
+      </p>
+
+      <p>
+        <strong>Room Type:</strong>
+        <span id="myRoomType">-</span>
+      </p>
+
+      <p>
+        <strong>Capacity:</strong>
+        <span id="myRoomCapacity">-</span>
+      </p>
+
+      <p>
+        <strong>Current Occupants:</strong>
+        <span id="myRoomOccupants">-</span>
+      </p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>System Notes</h3>
+    <p>
+      The dashboard data comes directly from the backend.
+    </p>
+  </div>
 </main></div>
 <script src="js/api.js"></script><script src="js/common.js"></script><script src="js/dashboard.js"></script>
 </body>
