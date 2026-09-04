@@ -16,7 +16,7 @@ public class DashboardServiceImpl implements DashboardService {
     private final StudentRepository studentRepository;
     private final RoomRepository roomRepository;
     private final ComplaintRepository complaintRepository;
-    private final PaymentRepository paymentRepository;
+//    private final PaymentRepository paymentRepository;
 
     public DashboardServiceImpl(
             StudentRepository studentRepository,
@@ -27,7 +27,7 @@ public class DashboardServiceImpl implements DashboardService {
         this.studentRepository = studentRepository;
         this.roomRepository = roomRepository;
         this.complaintRepository = complaintRepository;
-        this.paymentRepository = paymentRepository;
+//        this.paymentRepository = paymentRepository;
     }
 
     @Override
@@ -57,7 +57,7 @@ public class DashboardServiceImpl implements DashboardService {
                 );
 
         long pendingPayments =
-                paymentRepository.countByStatus(
+                studentRepository.countByPaymentStatus(
                         PaymentStatus.PENDING
                 );
 

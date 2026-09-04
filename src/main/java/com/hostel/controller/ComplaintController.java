@@ -4,6 +4,9 @@ import com.hostel.entity.Complaint;
 import com.hostel.service.ComplaintService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,11 +35,36 @@ public class ComplaintController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public List<Complaint> getAllComplaints() {
         return complaintService.getAllComplaints();
     }
 
+    @GetMapping("/my")
+    @PreAuthorize("hasRole('STUDENT')")
+    public List<Complaint> getMyComplaints(
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        return complaintService.getComplaintsForUser(
+                userDetails.getUsername()
+        );
+    }
+
+
+    @PostMapping("/my")
+    @PreAuthorize("hasRole('STUDENT')")
+    public Complaint createMyComplaint(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody Complaint complaint) {
+
+        return complaintService.createComplaintForUser(
+                userDetails.getUsername(),
+                complaint
+        );
+    }
+
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Complaint getComplaintById(
             @PathVariable Long id) {
 
@@ -44,6 +72,7 @@ public class ComplaintController {
     }
 
     @PostMapping("/student/{studentId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Complaint createComplaint(
             @PathVariable Long studentId,
             @Valid @RequestBody Complaint complaint) {
@@ -54,6 +83,7 @@ public class ComplaintController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Complaint> updateComplaint(
             @PathVariable Long id,
             @Valid @RequestBody Complaint complaintDetails) {
@@ -67,6 +97,7 @@ public class ComplaintController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteComplaint(
             @PathVariable Long id) {
 

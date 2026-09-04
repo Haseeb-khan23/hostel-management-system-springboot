@@ -1,40 +1,89 @@
 package com.hostel.service.impl;
 
 import com.hostel.dto.StudentResponse;
+import com.hostel.entity.Role;
 import com.hostel.entity.Student;
 import com.hostel.exception.BusinessException;
 import com.hostel.exception.ResourceNotFoundException;
 import com.hostel.repository.StudentRepository;
+import com.hostel.repository.UserRepository;
 import com.hostel.service.StudentService;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.hostel.entity.Room;
 import com.hostel.repository.RoomRepository;
 
 
 import java.util.List;
+import com.hostel.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
 public class StudentServiceImpl implements StudentService {
 
     private final StudentRepository studentRepository;
     private final RoomRepository roomRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
 
     public StudentServiceImpl(
             StudentRepository studentRepository,
-            RoomRepository roomRepository) {
+            RoomRepository roomRepository,
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder) {
 
         this.studentRepository = studentRepository;
         this.roomRepository = roomRepository;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
+//    @Override
+//    public StudentResponse saveStudent(Student student) {
+//        Student savedStudent = studentRepository.save(student);
+//        return toStudentResponse(savedStudent);
+//    }
 
     @Override
     public StudentResponse saveStudent(Student student) {
+
+        if (student.getUser() == null) {
+            throw new BusinessException("Student login account is required");
+        }
+
+        if (student.getUser().getUsername() == null ||
+                student.getUser().getUsername().isBlank()) {
+            throw new BusinessException("Username is required");
+        }
+
+        if (student.getUser().getPassword() == null ||
+                student.getUser().getPassword().isBlank()) {
+            throw new BusinessException("Password is required");
+        }
+
+        String username = student.getUser().getUsername().trim();
+
+        if (userRepository.findByUsername(username).isPresent()) {
+            throw new BusinessException(
+                    "Username already exists. Please choose another username."
+            );
+        }
+
+        student.getUser().setUsername(username);
+        student.getUser().setRole(Role.STUDENT);
+
+        student.getUser().setPassword(
+                passwordEncoder.encode(
+                        student.getUser().getPassword()
+                )
+        );
+
         Student savedStudent = studentRepository.save(student);
+
         return toStudentResponse(savedStudent);
     }
 

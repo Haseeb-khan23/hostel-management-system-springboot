@@ -1,11 +1,242 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Students | Hostel Management System</title><link rel="stylesheet" href="css/main.css"><link rel="stylesheet" href="css/students.css"></head>
-<body><div class="app-layout"><aside class="sidebar" id="sidebar"></aside><main class="main-content">
-    <header class="top-header"><div><h2>Students</h2><p>Manage student records</p></div><button id="addStudentBtn" class="btn btn-primary">Add Student</button></header>
-    <div id="alertBox" class="alert hidden"></div>
-    <div class="card" style="margin-bottom:1rem"><div style="display:flex;gap:.75rem;flex-wrap:wrap"><input id="searchName" class="form-control" style="max-width:300px" placeholder="Search by name"><button id="searchBtn" class="btn btn-secondary">Search</button><button id="resetSearchBtn" class="btn btn-secondary">Reset</button></div></div>
-    <div class="card"><table class="data-table"><thead><tr><th>ID</th><th>Name</th><th>Mobile</th><th>Course</th><th>Address</th><th>Payment</th><th>Room</th><th>Actions</th></tr></thead><tbody id="studentsTableBody"><tr><td colspan="8" class="text-center">Loading...</td></tr></tbody></table><div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem"><button id="prevPageBtn" class="btn btn-secondary">Previous</button><span id="pageInfo">Page 1</span><button id="nextPageBtn" class="btn btn-secondary">Next</button></div></div>
-</main></div>
-<div id="studentModal" class="modal hidden"><div class="modal-content"><div class="modal-header"><h3 id="modalTitle">Add Student</h3><span id="closeModal" class="close-btn">&times;</span></div><form id="studentForm"><input id="studentId" type="hidden"><div class="form-group"><label>Name</label><input id="studentName" class="form-control" required></div><div class="form-group"><label>Mobile Number</label><input id="studentMobile" class="form-control" inputmode="numeric" maxlength="10" required></div><div class="form-group"><label>Course</label><input id="studentCourse" class="form-control" required></div><div class="form-group"><label>Address</label><textarea id="studentAddress" class="form-control" rows="3" required></textarea></div><div class="form-group"><label>Payment Status</label><select id="studentPaymentStatus" class="form-control"><option value="PENDING">PENDING</option><option value="PAID">PAID</option></select></div><div class="form-actions"><button type="button" id="cancelBtn" class="btn btn-secondary">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div></form></div></div>
-<div id="roomModal" class="modal hidden"><div class="modal-content"><div class="modal-header"><h3>Assign / Change Room</h3><span id="closeRoomModal" class="close-btn">&times;</span></div><form id="roomAssignForm"><input id="roomStudentId" type="hidden"><div class="form-group"><label>Room Number</label><input id="roomNumberForStudent" class="form-control" required></div><div class="form-actions"><button type="button" id="cancelRoomBtn" class="btn btn-secondary">Cancel</button><button type="submit" class="btn btn-primary">Save Room</button></div></form></div></div>
-<script src="js/api.js"></script><script src="js/common.js"></script><script src="js/students.js"></script></body></html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Students - Hostel Management System</title>
+
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/students.css">
+</head>
+
+<body>
+
+<div class="app-layout">
+
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="main-content">
+
+        <header class="top-header">
+            <h2>Student Management</h2>
+
+            <button
+                    id="addStudentBtn"
+                    class="btn btn-primary admin-only">
+                Add New Student
+            </button>
+        </header>
+
+        <div id="alertBox" class="alert hidden"></div>
+
+        <div class="card">
+
+            <table class="data-table">
+
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Mobile</th>
+                    <th>Course</th>
+                    <th>Address</th>
+                    <th>Room No</th>
+                    <th>Payment Status</th>
+                    <th class="admin-only">Actions</th>
+                </tr>
+                </thead>
+
+                <tbody id="studentsTableBody">
+
+                <tr>
+                    <td colspan="8" class="text-center">
+                        Loading students...
+                    </td>
+                </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<!-- Student Modal -->
+
+<div id="studentModal" class="modal hidden">
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+
+            <h3 id="modalTitle">
+                Add Student
+            </h3>
+
+            <span
+                    class="close-btn"
+                    id="closeModal">
+                &times;
+            </span>
+
+        </div>
+
+
+        <form id="studentForm">
+
+            <input
+                    type="hidden"
+                    id="studentId">
+
+
+            <div class="form-group">
+
+                <label for="studentName">
+                    Full Name
+                </label>
+
+                <input
+                        type="text"
+                        id="studentName"
+                        class="form-control"
+                        required>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="studentPhone">
+                    Mobile Number
+                </label>
+
+                <input
+                        type="text"
+                        id="studentPhone"
+                        class="form-control"
+                        pattern="[6-9][0-9]{9}"
+                        maxlength="10"
+                        required>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="studentCourse">
+                    Course
+                </label>
+
+                <input
+                        type="text"
+                        id="studentCourse"
+                        class="form-control"
+                        required>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="studentAddress">
+                    Address
+                </label>
+
+                <textarea
+                        id="studentAddress"
+                        class="form-control"
+                        required></textarea>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="studentRoom">
+                    Room Number
+                </label>
+
+                <select
+                        id="studentRoom"
+                        class="form-control"
+                        required>
+
+                    <option value="">
+                        Select an available room
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div class="form-group">
+                <label for="studentPaymentStatus">
+                    Payment Status
+                </label>
+
+                <select
+                        id="studentPaymentStatus"
+                        class="form-control"
+                        required>
+
+                    <option value="PENDING">PENDING</option>
+                    <option value="PAID">PAID</option>
+
+                </select>
+            </div>
+
+            <div id="studentUsernameGroup" class="form-group">
+                <label>Username</label>
+                <input
+                        id="studentUsername"
+                        class="form-control"
+                        type="text"
+                        autocomplete="username"
+                        placeholder="Enter unique username">
+            </div>
+
+            <div id="studentPasswordGroup" class="form-group">
+                <label>Password</label>
+                <input
+                        id="studentPassword"
+                        class="form-control"
+                        type="password"
+                        autocomplete="new-password"
+                        placeholder="Enter password">
+            </div>
+
+
+            <div class="form-actions">
+
+                <button
+                        type="button"
+                        class="btn btn-secondary"
+                        id="cancelBtn">
+                    Cancel
+                </button>
+
+                <button
+                        type="submit"
+                        class="btn btn-primary">
+                    Save Student
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script src="js/api.js"></script>
+<script src="js/common.js"></script>
+<script src="js/students.js"></script>
+
+</body>
+</html>

@@ -42,10 +42,34 @@ public class ComplaintServiceImpl implements ComplaintService {
 
         return complaintRepository.save(complaint);
     }
+    @Override
+    public Complaint createComplaintForUser(
+            String username,
+            Complaint complaint) {
+
+        Student student = studentRepository
+                .findByUser_Username(username)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Student account is not linked to a student record"));
+
+        complaint.setStudent(student);
+        complaint.setStatus(ComplaintStatus.PENDING);
+        complaint.setCreatedAt(LocalDateTime.now());
+
+        return complaintRepository.save(complaint);
+    }
 
     @Override
     public List<Complaint> getAllComplaints() {
         return complaintRepository.findAll();
+    }
+    @Override
+    public List<Complaint> getComplaintsForUser(
+            String username) {
+
+        return complaintRepository
+                .findByStudent_User_Username(username);
     }
 
     @Override

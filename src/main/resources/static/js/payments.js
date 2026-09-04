@@ -1,6 +1,291 @@
-document.addEventListener('DOMContentLoaded',()=>{loadPayments();const form=document.getElementById('paymentForm'),modal=document.getElementById('paymentModal'),hide=()=>modal.classList.add('hidden');document.getElementById('addPaymentBtn').onclick=()=>{form.reset();document.getElementById('paymentId').value='';document.getElementById('modalTitle').textContent='Record Payment';modal.classList.remove('hidden');};document.getElementById('closeModal').onclick=hide;document.getElementById('cancelBtn').onclick=hide;form.onsubmit=savePayment;});
-async function loadPayments(){const body=document.getElementById('paymentsTableBody');try{const payments=await api.get('/payments');if(!payments.length){body.innerHTML='<tr><td colspan="7" class="text-center">No payment records found.</td></tr>';return;}body.innerHTML=payments.map(p=>`<tr><td>${p.id}</td><td>${p.student?.id??'-'}${p.student?.name?`<br>${escapeHtml(p.student.name)}`:''}</td><td>₹${Number(p.amount).toFixed(2)}</td><td>${p.paymentMethod}</td><td><span class="badge ${p.status==='PAID'?'badge-success':'badge-warning'}">${p.status}</span></td><td>${formatDate(p.paymentDate)}</td><td><button class="btn btn-sm btn-secondary" onclick="editPayment(${p.id})">Edit</button> <button class="btn btn-sm btn-danger" onclick="deletePayment(${p.id})">Delete</button></td></tr>`).join('');}catch(e){body.innerHTML=`<tr><td colspan="7" class="text-center">${escapeHtml(e.message)}</td></tr>`;}}
-function fillPayment(p){document.getElementById('paymentId').value=p.id;document.getElementById('paymentStudentId').value=p.student?.id||'';document.getElementById('paymentAmount').value=p.amount;document.getElementById('paymentMethod').value=p.paymentMethod;document.getElementById('paymentStatus').value=p.status;document.getElementById('modalTitle').textContent='Edit Payment';document.getElementById('paymentModal').classList.remove('hidden');}
-async function editPayment(id){try{fillPayment(await api.get(`/payments/${id}`));}catch(e){showAlert(e.message);}}
-async function savePayment(e){e.preventDefault();const id=document.getElementById('paymentId').value;const studentId=document.getElementById('paymentStudentId').value;const payload={amount:Number(document.getElementById('paymentAmount').value),paymentMethod:document.getElementById('paymentMethod').value,status:document.getElementById('paymentStatus').value};try{if(id)await api.put(`/payments/${id}`,payload);else await api.post(`/payments/student/${studentId}`,payload);document.getElementById('paymentModal').classList.add('hidden');showAlert(id?'Payment updated.':'Payment recorded.','success');loadPayments();}catch(e){showAlert(e.message);}}
-async function deletePayment(id){if(!confirm('Delete this payment?'))return;try{await api.delete(`/payments/${id}`);showAlert('Payment deleted.','success');loadPayments();}catch(e){showAlert(e.message);}}
+document.addEventListener('DOMContentLoaded', () => {
+    loadPayments();
+    setupEventListeners();
+});
+
+
+function setupEventListeners() {
+
+    const modal = document.getElementById('paymentModal');
+    const addBtn = document.getElementById('addPaymentBtn');
+    const closeBtn = document.getElementById('closeModal');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const form = document.getElementById('paymentForm');
+
+    if (addBtn) {
+        addBtn.addEventListener('click', async () => {
+
+            form.reset();
+
+            await loadStudentsForPayment();
+
+            modal.classList.remove('hidden');
+        });
+    }
+
+    const hideModal = () => {
+        modal.classList.add('hidden');
+    };
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', hideModal);
+    }
+
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', hideModal);
+    }
+
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+
+            e.preventDefault();
+
+            const studentId =
+                document.getElementById(
+                    'paymentStudentId'
+                ).value;
+
+            const amount =
+                parseFloat(
+                    document.getElementById(
+                        'paymentAmount'
+                    ).value
+                );
+
+            const paymentMethod =
+                document.getElementById(
+                    'paymentMethod'
+                ).value;
+
+            const status =
+                document.getElementById(
+                    'paymentStatus'
+                ).value;
+
+            if (!studentId) {
+                showAlert(
+                    'Please select a student.'
+                );
+                return;
+            }
+
+            if (!amount || amount <= 0) {
+                showAlert(
+                    'Amount must be greater than 0.'
+                );
+                return;
+            }
+
+            const payload = {
+                amount: amount,
+                paymentMethod: paymentMethod,
+                status: 'Paid'
+            };
+
+            try {
+
+                await api.post(
+                    `/payments/student/${studentId}`,
+                    payload
+                );
+
+                showAlert(
+                    'Payment recorded successfully.',
+                    'success'
+                );
+
+                hideModal();
+                loadPayments();
+
+            } catch (err) {
+
+                showAlert(
+                    err.message ||
+                    'Failed to record payment.'
+                );
+            }
+        });
+    }
+}
+
+
+async function loadStudentsForPayment() {
+
+    const studentSelect =
+        document.getElementById(
+            'paymentStudentId'
+        );
+
+    if (!studentSelect) {
+        return;
+    }
+
+    try {
+
+        const students =
+            await api.get('/students');
+
+        studentSelect.innerHTML =
+            '<option value="">Select a student</option>';
+
+        if (!students || students.length === 0) {
+
+            studentSelect.innerHTML =
+                '<option value="">No students available</option>';
+
+            return;
+        }
+
+        students.forEach(student => {
+
+            const option =
+                document.createElement('option');
+
+            option.value = student.id;
+
+            option.textContent =
+                `${student.name} - Room ${student.roomNumber || 'Not Assigned'}`;
+
+            studentSelect.appendChild(option);
+        });
+
+    } catch (err) {
+
+        studentSelect.innerHTML =
+            '<option value="">Unable to load students</option>';
+
+        showAlert(
+            err.message ||
+            'Failed to load students.'
+        );
+    }
+}
+
+
+async function loadPayments() {
+
+    const tableBody =
+        document.getElementById(
+            'paymentsTableBody'
+        );
+
+    const role =
+        localStorage.getItem('role');
+
+    try {
+
+        // Admin can see all payment records.
+        // Student can only see their own records
+        // if the backend provides such an endpoint.
+        if (role === 'ROLE_STUDENT') {
+
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center">
+                        Payment records are view-only for students.
+                    </td>
+                </tr>
+            `;
+
+            return;
+        }
+
+        const payments =
+            await api.get('/payments');
+
+        if (!payments || payments.length === 0) {
+
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center">
+                        No payment records found.
+                    </td>
+                </tr>
+            `;
+
+            return;
+        }
+
+        tableBody.innerHTML =
+            payments.map(payment => {
+
+                const student =
+                    payment.student;
+
+                const studentName =
+                    student
+                        ? student.name
+                        : 'Unknown';
+
+                const roomNumber =
+                    student &&
+                    student.room
+                        ? student.room.roomNumber
+                        : 'N/A';
+
+                const status =
+                    payment.status || 'PENDING';
+
+                const statusClass =
+                    status === 'PAID'
+                        ? 'success'
+                        : 'warning';
+
+                return `
+                    <tr>
+
+                        <td>${payment.id}</td>
+
+                        <td>
+                            ${studentName}
+                        </td>
+
+                        <td>
+                            ${roomNumber}
+                        </td>
+
+                        <td>
+                            ₹${payment.amount}
+                        </td>
+
+                        <td>
+                            ${payment.paymentMethod}
+                        </td>
+
+                        <td>
+                            <span class="badge badge-${statusClass}">
+                                ${status}
+                            </span>
+                        </td>
+
+                        <td>
+                            ${
+                                payment.paymentDate
+                                    ? new Date(
+                                        payment.paymentDate
+                                    ).toLocaleDateString()
+                                    : 'N/A'
+                            }
+                        </td>
+
+                        <td>
+                            <span class="text-muted">No actions</span>
+                        </td>
+
+                        </tr>
+                `;
+            }).join('');
+
+    } catch (err) {
+
+        tableBody.innerHTML = `
+            <tr>
+                <td
+                    colspan="8"
+                    class="text-center text-danger">
+                    ${err.message}
+                </td>
+            </tr>
+        `;
+    }
+}

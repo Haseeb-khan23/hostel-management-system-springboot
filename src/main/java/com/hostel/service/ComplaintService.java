@@ -11,7 +11,16 @@ public interface ComplaintService {
             Complaint complaint
     );
 
+    Complaint createComplaintForUser(
+            String username,
+            Complaint complaint
+    );
+
     List<Complaint> getAllComplaints();
+
+    List<Complaint> getComplaintsForUser(
+            String username
+    );
 
     Complaint getComplaintById(Long id);
 

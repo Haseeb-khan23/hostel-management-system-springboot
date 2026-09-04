@@ -35,22 +35,22 @@ public class AdminInitializer {
                 );
             }
 
-            if (userRepository.findByUsername("student").isEmpty()) {
-
-                User student = new User();
-
-                student.setUsername("student");
-                student.setPassword(
-                        passwordEncoder.encode("student123")
-                );
-                student.setRole(Role.STUDENT);
-
-                userRepository.save(student);
-
-                System.out.println(
-                        "Default student user created successfully."
-                );
-            }
+//            if (userRepository.findByUsername("student").isEmpty()) {
+//
+//                User student = new User();
+//
+//                student.setUsername("student");
+//                student.setPassword(
+//                        passwordEncoder.encode("student123")
+//                );
+//                student.setRole(Role.STUDENT);
+//
+//                userRepository.save(student);
+//
+//                System.out.println(
+//                        "Default student user created successfully."
+//                );
+//            }
         };
     }
 }

@@ -40,7 +40,7 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setPaymentDate(LocalDateTime.now());
 
         if (payment.getStatus() == null) {
-            payment.setStatus(PaymentStatus.PENDING);
+            payment.setStatus(PaymentStatus.PAID);
         }
 
         return paymentRepository.save(payment);
